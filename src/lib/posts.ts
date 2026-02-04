@@ -10,7 +10,7 @@ export interface PostMeta {
   excerpt: string;
   date: string;
   authors: string[];
-  tags: Array<{ type: 'methods' | 'vision' | 'nlp' | 'ml' | 'systems'; label: string }>;
+  tags: Array<{ type: 'methods' | 'vision' | 'nlp' | 'ml' | 'systems' | 'fairness'; label: string }>;
   featured?: boolean;
 }
 

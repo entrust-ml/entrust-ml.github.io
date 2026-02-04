@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Tag from './Tag';
 
-type TagType = 'methods' | 'vision' | 'nlp' | 'ml' | 'systems';
+type TagType = 'methods' | 'vision' | 'nlp' | 'ml' | 'systems' | 'fairness';
 
 interface PostCardProps {
   title: string;

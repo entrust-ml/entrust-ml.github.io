@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-type TagType = 'methods' | 'vision' | 'nlp' | 'ml' | 'systems';
+type TagType = 'methods' | 'vision' | 'nlp' | 'ml' | 'systems' | 'fairness';
 
 interface TagProps {
   type: TagType;
@@ -14,6 +14,7 @@ const tagStyles: Record<TagType, string> = {
   nlp: 'bg-blue-100 text-blue-800 border-blue-200',
   ml: 'bg-green-100 text-green-700 border-green-200',
   systems: 'bg-orange-100 text-orange-700 border-orange-200',
+  fairness: 'bg-pink-100 text-pink-700 border-pink-200',
 };
 
 export default function Tag({ type, label, href }: TagProps) {
