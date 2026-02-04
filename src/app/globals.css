@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* KaTeX styles */
+@import 'katex/dist/katex.min.css';
+
+/* Apple-like smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom selection color */
+::selection {
+  background-color: rgba(0, 102, 204, 0.2);
+}
+
+/* Links - no underline by default, underline on hover */
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* KaTeX display math styling */
+.katex-display {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.katex {
+  font-size: 1.1em;
+}
+
+/* Tag color classes */
+.tag-methods {
+  @apply bg-purple-100 text-purple-700 border-purple-200;
+}
+
+.tag-vision {
+  @apply bg-sky-100 text-sky-700 border-sky-200;
+}
+
+.tag-nlp {
+  @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+
+.tag-ml {
+  @apply bg-green-100 text-green-700 border-green-200;
+}
+
+.tag-systems {
+  @apply bg-orange-100 text-orange-700 border-orange-200;
+}
+
+/* Prose customization for MDX */
+.prose-apple {
+  --tw-prose-body: #424245;
+  --tw-prose-headings: #1d1d1f;
+  --tw-prose-links: #0066cc;
+  --tw-prose-code: #1d1d1f;
+  --tw-prose-pre-bg: #1d1d1f;
+}
+
+/* Code block styling */
+pre code {
+  background: transparent !important;
+  padding: 0 !important;
+}
