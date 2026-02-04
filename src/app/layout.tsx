@@ -10,8 +10,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Entrust',
-  description: 'Advancing the state of the art in machine learning research',
+  title: 'Entrust ML',
+  description: 'Learn about the Applied Science team at Entrust and our research in machine learning, computer vision, and biometrics.',
 };
 
 export default function RootLayout({
