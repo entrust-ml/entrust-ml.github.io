@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { MDXRemote, MDXRemoteProps } from 'next-mdx-remote/rsc';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypePrettyCode from 'rehype-pretty-code';
 import { getPostBySlug, getAllPostSlugs } from '@/lib/posts';
 import Tag from '@/components/Tag';
 
@@ -43,11 +44,17 @@ const mdxComponents: MDXRemoteProps['components'] = {
   blockquote: (props) => (
     <blockquote className="border-l-4 border-apple-gray-300 pl-4 italic text-apple-gray-500 my-4" {...props} />
   ),
-  code: (props) => (
-    <code className="bg-apple-gray-100 text-apple-gray-700 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
-  ),
-  pre: (props) => (
-    <pre className="bg-apple-gray-800 text-apple-gray-100 p-4 rounded-lg overflow-x-auto mb-4 text-sm" {...props} />
+  code: ({ children, ...props }) => {
+    // Check if this is inline code (not inside a pre block)
+    // rehype-pretty-code adds data attributes to code blocks
+    const isInlineCode = !('data-language' in props);
+    if (isInlineCode) {
+      return <code className="bg-apple-gray-100 text-apple-gray-700 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>{children}</code>;
+    }
+    return <code {...props}>{children}</code>;
+  },
+  pre: ({ children, ...props }) => (
+    <pre className="bg-[#24292e] text-apple-gray-100 p-4 rounded-lg overflow-x-auto mb-4 text-sm" {...props}>{children}</pre>
   ),
   strong: (props) => (
     <strong className="font-semibold text-apple-gray-700" {...props} />
@@ -139,7 +146,10 @@ export default async function PostPage({ params }: PostPageProps) {
           options={{
             mdxOptions: {
               remarkPlugins: [remarkMath],
-              rehypePlugins: [rehypeKatex],
+              rehypePlugins: [
+                rehypeKatex,
+                [rehypePrettyCode, { theme: 'github-dark' }],
+              ],
             },
           }}
         />
