@@ -70,3 +70,57 @@ pre code {
   background: transparent !important;
   padding: 0 !important;
 }
+
+/* Footnote styling */
+.footnotes {
+  @apply mt-12 pt-8 border-t border-apple-gray-200;
+  font-size: 0.875rem;
+}
+
+.footnotes h2 {
+  @apply sr-only;
+}
+
+.footnotes ol {
+  @apply list-decimal list-outside ml-4 space-y-2;
+}
+
+.footnotes li {
+  @apply text-apple-gray-500 pl-2;
+}
+
+.footnotes li p {
+  @apply inline;
+}
+
+/* Footnote reference in text (superscript number) */
+a[data-footnote-ref] {
+  @apply text-blue-600 font-medium;
+  font-size: 0.75em !important;
+  text-decoration: none !important;
+  vertical-align: baseline !important;
+  position: relative !important;
+  top: -0.25em !important;
+  margin-left: 1px;
+}
+
+a[data-footnote-ref]:hover {
+  @apply text-blue-800;
+  text-decoration: underline !important;
+}
+
+/* Back reference arrow in footnotes */
+a[data-footnote-backref] {
+  @apply text-blue-600 ml-1;
+  text-decoration: none !important;
+}
+
+a[data-footnote-backref]:hover {
+  @apply text-blue-800;
+}
+
+/* Scroll offset for sticky header on anchor links */
+[id^="user-content-fn"],
+[id^="user-content-fnref"] {
+  scroll-margin-top: 5rem;
+}
