@@ -39,6 +39,7 @@ Here, we will take a closer look at the problem of extracting data from document
 We can imagine several approaches to the problem.
 
 ![img](https://martinsbruveris.github.io/assets/images/2024/10/lora/template_ocr_and_vlm.jpg)
+
 _Template-based and using visual language models-based OCR_
 
 Identity documents are very regular. Within a single document type, data fields will always be in the same position relative to the document. We can leverage this regularity and annotate the location of data fields with bounding boxes in a template and, after aligning the input image to the template, apply an OCR algorithm to that region. This method will work, but it will hit a performance ceiling when we realize that some document types are less regular than others: fields, particularly the address field, can span multiple lines and field alignment can be variable, both in the horizontal and vertical.
@@ -48,6 +49,7 @@ On the other end of the spectrum, we could use the vision capabilities of one of
 To achieve the human-level extraction accuracy we require from our product, we need to train our own models. In the last years, several foundation models for document understanding and visual question answering have been released: Dessurt, Donut, Pix2Struct, LayoutLM. These models all share a similar architecture.
 
 ![img](https://martinsbruveris.github.io/assets/images/2024/10/lora/extraction_architecture.jpg)
+
 _Transformer-based end-to-end extraction architecture_
 
 The model inputs are an image and a text prompt. The image is encoded by a vision transformer and the resulting embedding together with the prompt are fed into a decoder that produces the desired output.
@@ -64,6 +66,7 @@ So now we have a medium-size model, 250M parameters, 1GB when saved on disk and 
 
 
 ![Different document type grouping scenarios](https://martinsbruveris.github.io/assets/images/2024/10/lora/model_grouping_options.png)
+
 _Different options for grouping document types and models_
 
 As we move along this spectrum from left to right, we buy flexibility by paying with additional complexity. The solution on the left is the simplest one: only one model needs to be trained, only one model needs to be deployed. But it is also the most rigid solution: to support an additional document type, the whole model needs to be retrained; a process that can take several days of training time.
@@ -77,7 +80,8 @@ And now we arrive at the question that motivated the talk: How do we serve 1,000
 ## Enter LoRA
 Low-Rank Adaptation (LoRA) is a parameter-efficient fine-tuning method. The idea of LoRA is as follows: when fine-tuning a model, instead of learning all parameters of a weight matrix directly, we only learn low-rank updates to the matrix as follows.
 
-![LoRA architecture](https://martinsbruveris.github.io/assets/images/2024/10/lora/lora.jpg)
+![LoRA architecture | md](https://martinsbruveris.github.io/assets/images/2024/10/lora/lora.jpg)
+
 _Architecture of a LoRA layer_
 
 Let us consider an ordinary linear layer in the model,
@@ -95,7 +99,8 @@ During LoRA training we keep $W$ constant and only learn the matrices $A$ and $B
 $d^2$ to $2rd$. A common choice for the rank is $r=4$ or $r=8$. In a ViT base model, we have
 $d=768$, so this results in 96- or 48-fold reduction in the number of trainable parameters for the linear layer.
 
-![Attention layer](https://martinsbruveris.github.io/assets/images/2024/10/lora/transformer_architecture.jpg)
+![Attention layer | md](https://martinsbruveris.github.io/assets/images/2024/10/lora/transformer_architecture.jpg)
+
 _Schema of the attention layer and the general transformer architecture_
 
 We apply this method to layers throughout the network. In a transformer architecture we can adapt the Q, K and V projection layers in each attention head, the linear layer merging attention heads together as well as the post-attention MLP layer. Going beyond transformers, with small modifications, LoRA can also be applied to convolutional layers.
@@ -140,6 +145,7 @@ $A$ and $B$ matrices, we can reduce the training time to values comparable to re
 ## VeRA and LoRA-XS
 
 ![VeRA and LoRA-XS](https://martinsbruveris.github.io/assets/images/2024/10/lora/vera_lora_xs.jpg)
+
 _VeRA and LoRA-XS_
 
 For example, VeRA, freezes the matrices

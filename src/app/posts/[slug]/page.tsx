@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { MDXRemote, MDXRemoteProps } from 'next-mdx-remote/rsc';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
+import remarkImageSize from '@/lib/remark-image-size';
 import rehypeKatex from 'rehype-katex';
 import rehypePrettyCode from 'rehype-pretty-code';
 import { getPostBySlug, getAllPostSlugs } from '@/lib/posts';
@@ -146,7 +147,7 @@ export default async function PostPage({ params }: PostPageProps) {
           components={mdxComponents}
           options={{
             mdxOptions: {
-              remarkPlugins: [remarkGfm, remarkMath],
+              remarkPlugins: [remarkGfm, remarkMath, remarkImageSize],
               rehypePlugins: [
                 rehypeKatex,
                 [rehypePrettyCode, { theme: 'github-dark' }],

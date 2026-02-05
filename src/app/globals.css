@@ -71,6 +71,37 @@ pre code {
   padding: 0 !important;
 }
 
+/* Center images in blog posts */
+.prose img {
+  @apply mx-auto;
+}
+
+/* Image size classes: ![alt |xs/sm/md/lg/full](url) */
+.prose img.img-xs {
+  @apply max-h-32;
+}
+
+.prose img.img-sm {
+  @apply max-h-48;
+}
+
+.prose img.img-md {
+  @apply max-h-72;
+}
+
+.prose img.img-lg {
+  @apply max-h-96;
+}
+
+.prose img.img-full {
+  @apply max-h-none w-full;
+}
+
+/* Image captions - paragraphs containing only italic text */
+.prose p:has(> em:only-child) {
+  @apply text-center text-apple-gray-500 text-sm mt-2;
+}
+
 /* Footnote styling */
 .footnotes {
   @apply mt-12 pt-8 border-t border-apple-gray-200;
