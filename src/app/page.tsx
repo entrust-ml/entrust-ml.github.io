@@ -30,7 +30,7 @@ export default function Home() {
       {/* Hero Banner */}
       <HeroBanner
         title="Discover opportunities in Machine Learning"
-        subtitle="Explore cutting-edge research and join our team of researchers."
+        subtitle=""
         ctaText="View open positions"
         ctaHref="/careers"
       />
