@@ -42,19 +42,23 @@ featured: true
 
 ### Adding Images
 
-**Local images:** Place images in the `public/images/` folder and reference them with an absolute path:
+**Local images:** Place images in the `public/images/{year}/{post-slug}/` folder and reference them with an absolute path:
 
 ```markdown
-![My diagram](/images/my-post/diagram.png)
+![My diagram](/images/2024/my-post-slug/diagram.png)
 ```
 
 Recommended folder structure:
 ```
 public/
   images/
-    my-post-slug/
-      diagram.png
-      architecture.jpg
+    2024/
+      my-post-slug/
+        diagram.png
+        architecture.jpg
+    2025/
+      another-post/
+        figure1.png
 ```
 
 **External images:** Use the full URL:

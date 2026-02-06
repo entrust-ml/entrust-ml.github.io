@@ -25,7 +25,7 @@ The biometric problems of face recognition and liveness detection are challengin
 
 Document verification faces different challenges, with the key feature being the sheer number of different document types in the world. Each country has its own passport, driving license, identity card, and residence permit; and new versions of these documents are being issued every few years. The total number of documents in circulation worldwide is measured in the thousands. To keep it simple, we assume that we want our identity verification system to support 2,000 document types.
 
-![ID documents from various countries](/images/serving-lora-models-at-scale/id_documents_collage.jpg)
+![ID documents from various countries](/images/2024/serving-lora-models-at-scale/id_documents_collage.jpg)
 
 _ID documents from various countries._
 
@@ -36,7 +36,7 @@ Here, we will take a closer look at the problem of extracting data from document
 
 We can imagine several approaches to the problem.
 
-![Template-based and VLM-based OCR](/images/serving-lora-models-at-scale/template_ocr_and_vlm.jpg)
+![Template-based and VLM-based OCR](/images/2024/serving-lora-models-at-scale/template_ocr_and_vlm.jpg)
 
 _Template-based and using visual language models-based OCR_
 
@@ -46,7 +46,7 @@ On the other end of the spectrum, we could use the vision capabilities of one of
 
 To achieve the human-level extraction accuracy we require from our product, we need to train our own models. In the last years, several foundation models for document understanding and visual question answering have been released: Dessurt, Donut, Pix2Struct, LayoutLM. These models all share a similar architecture.
 
-![Extraction architecture](/images/serving-lora-models-at-scale/extraction_architecture.jpg)
+![Extraction architecture](/images/2024/serving-lora-models-at-scale/extraction_architecture.jpg)
 
 _Transformer-based end-to-end extraction architecture_
 
@@ -63,7 +63,7 @@ So now we have a medium-size model, 250M parameters, 1GB when saved on disk and 
 1. Find an intermediate solution: 50 models with one model per 20 document types.
 
 
-![Different document type grouping scenarios](/images/serving-lora-models-at-scale/model_grouping_options.png)
+![Different document type grouping scenarios](/images/2024/serving-lora-models-at-scale/model_grouping_options.png)
 
 _Different options for grouping document types and models_
 
@@ -78,7 +78,7 @@ And now we arrive at the question that motivated the talk: How do we serve 1,000
 ## Enter LoRA
 Low-Rank Adaptation (LoRA) is a parameter-efficient fine-tuning method. The idea of LoRA is as follows: when fine-tuning a model, instead of learning all parameters of a weight matrix directly, we only learn low-rank updates to the matrix as follows.
 
-![LoRA architecture |md](/images/serving-lora-models-at-scale/lora.jpg)
+![LoRA architecture |md](/images/2024/serving-lora-models-at-scale/lora.jpg)
 
 _Architecture of a LoRA layer_
 
@@ -97,7 +97,7 @@ During LoRA training we keep $W$ constant and only learn the matrices $A$ and $B
 $d^2$ to $2rd$. A common choice for the rank is $r=4$ or $r=8$. In a ViT base model, we have
 $d=768$, so this results in 96- or 48-fold reduction in the number of trainable parameters for the linear layer.
 
-![Attention layer |md](/images/serving-lora-models-at-scale/transformer_architecture.jpg)
+![Attention layer |md](/images/2024/serving-lora-models-at-scale/transformer_architecture.jpg)
 
 _Schema of the attention layer and the general transformer architecture_
 
@@ -142,7 +142,7 @@ $A$ and $B$ matrices, we can reduce the training time to values comparable to re
 
 ## VeRA and LoRA-XS
 
-![VeRA and LoRA-XS](/images/serving-lora-models-at-scale/vera_lora_xs.jpg)
+![VeRA and LoRA-XS](/images/2024/serving-lora-models-at-scale/vera_lora_xs.jpg)
 
 _VeRA and LoRA-XS_
 
