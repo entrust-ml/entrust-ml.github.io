@@ -12,6 +12,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Entrust ML',
   description: 'Learn about the Applied Science team at Entrust and our research in machine learning, computer vision, and biometrics.',
+  icons: {
+    icon: '/entrust.svg',
+    apple: '/entrust.svg',
+  },
 };
 
 export default function RootLayout({
