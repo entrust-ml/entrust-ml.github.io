@@ -1,0 +1,147 @@
+---
+title: "An Introduction to Tiny Recursive Models (TRM)"
+excerpt: "AA new generation of efficient reasoning models is coming"
+date: "Feb 6, 2026"
+authors: ["Olivier Koch"]
+tags:
+  - type: "models"
+    label: "Methods and Algorithms"
+featured: true
+---
+
+This post is a deep dive into TRM, which won 1st place at the <a href="https://arcprize.org">ARC-AGI-2 challenge</a> in Oct 2025. We propose an overview of the method and deep dive into the code. We built <a href="https://github.com/olivkoch/nano-trm">nano-trm</a> to make TRM accessible to everyone.
+
+## A brief history of thinking models
+
+The past two years saw tremendous progress in the field of AI reasoning models.
+The party started with OpenAI releasing the o1 family in September 2024, with a technique known as Reinforcement Learning from Verifiable Rewards (RLVR).
+DeepSeek shook up the field in January 2025 with R1, a 671-billion-parameter open-weight reasoning model that achieved comparable performance to OpenAI's o1 while being significantly more cost-effective to operate.
+Anthropic released an "extended thinking" capability to Claude with Claude 3.7 Sonnet, following up with the Claude 4 family and Opus 4.5 (November 2025).
+Meanwhile, Google's Gemini 3 models achieved outstanding performance in mathematics, winning gold at IMO 2025. The Gemini 2.5 Pro and Flash models with "Deep Think" capabilities appeared mid-2025, and by December, Gemini 3 Flash was combining Pro-grade reasoning with Flash-level latency and efficiency. 
+
+In short, every major AI lab released a reasoning ("thinking") variant of their model following DeepSeek R1.
+
+While all this was happening, a paralle revolution was happening for people with less means: the ARC-AGI challenge, which started several years ago, focuses on tasks that are relatively easy for humans yet hard or impossible for AI.
+It took 4 years to go from 0% with GPT-3 in 2020 to 5% with GPT-4o in 2024 ARC Prize, then o3 jumped to 75.7%, but at a massive computation cost.  The price per task for o3's high efficiency mode was estimated at around &#0036;200, and the low efficiency mode at an eye-watering &#0036;3,400 per task. On ARC-AGI-1, o3 achieved 76% at &#0036;200/task in low-compute mode and 88% at &#0036;20,000/task in high-compute mode. The leaderboard is now organized as a 2×2 matrix with axes for cost-per-task and score. 
+The challenge is therefore designed to spur new research ideas. On ARC AGI 2, the 1st place solution (TRM) used a ~7M-parameter recursive model, the 2nd place (SOAR) used evolutionary program synthesis, and the 3rd (CompressARC) used MDL-based neural code golf with no pretraining.
+
+## Hierarchical Reasoning Models
+
+TRM is an evolution of Hierarchical Recusive Models (<a href="https://arxiv.org/abs/2506.21734">HRM</a>), published by Sapient Intelligence (Singapore). HRM increases the efectiveness of depth with two couple recurring modules, each evolving at different frequency.
+This design breaks the glass ceiling hit by Recurrent Transformers.
+
+![HRM increases depth efficiency](/images/2026/intro-to-trm/hrm-breaking-depth-ceiling.png)
+
+## TRM: keeping things simple
+
+<a href="https://arxiv.org/abs/2510.04871">TRM</a> was published by the Samsung AI Lab in 2025. The results on ARC-AGI-2, Sudoku-Extreme and Maze-Hard speak for themselves.
+
+![TRM results](/images/2026/intro-to-trm/trm-results.png)
+
+At the time of writing this post, TRM sits at a decent place on the official ARC-AGI-2 leaderboard, reaching 6.3% accuracy at &#0036;2.10 per task.
+
+![ARC-AGI-2 leaderboard](/images/2026/intro-to-trm/arc-agi-2-leaderboard.png)
+
+TRM builds upon HRM but strips off a lot of complexity. The high-level architecture remains unchanged.
+
+![TRM architecture](/images/2026/intro-to-trm/trm-architecture.png)
+
+TRM is recursive because it recursively maintains a latent representation of the soluzion, $z_H$, and of the problem, $z_L$. These two vectors are continuously updated
+during training.
+
+The halting head is a binary classifier that decides whether the recursion loop should stop or not, i.e. whether the model should stop thinking for a given input.
+On this apect, TRM simplifies HRM significantly. While HRM relies on Q-learning, and therefore requires computing a future reward at the cost of additional inference, TRM
+uses PQN (the halting head is a simple linear classifier applied to $z_H$). This simplifies the halting mechanism significantly.
+
+In code, HRM stops like this:
+
+```
+# 1. Run the model one more step into the future (lookahead)
+next_q_halt, next_q_continue = self.inner(...)[-1]
+
+# 2. Compute Target Value (Bellman Backup)
+# value = max(future halt value, future continue Value)
+target_q_continue = torch.sigmoid(
+    torch.where(is_last_step, next_q_halt, torch.maximum(next_q_halt, next_q_continue)))
+
+```
+
+while TRM stops like this:
+
+```
+q_logits = self.q_head(z_H[:, 0])
+halted = halted | (q_halt_logits > 0)
+```
+
+The architecture of the core reasoning module is the same for HRM and TRM, but here again, TRM simplifies things. Instead of relying on two networks (one for $z_H$ and one for $z_L$),
+    it uses a single one. It isn't just the same architecture, it is the same network with the same *weights*. The trick is to used different inputs to specify the task:
+    - To predict $z_L$ (the problem), we input $z_L$, $z_H$ and the input $x$
+    - To predict $z_H$ (the solution), we only input $z_H$ and $z_L$
+
+Consequently, the input $x$ is not fed into the network to predict the output, which forces the network to learn a good representation of the problem.
+
+![TRM cycles](/images/2026/intro-to-trm/trm-cycles.png)
+
+The architecture of the reasoning module $f$ is a classical attention-based mechanism, repeated $num_{layers}$ times. The module uses self-attention of a plain MLP. The results reported in the paper
+show that self-attention is better on ARC-AGI-2 and Maze-Hard but not on Sudoku.
+
+![TRM reasoning module](/images/2026/intro-to-trm/trm-reasoning-module.png)
+
+Muck like in HRM, a full forward pass of the model involves $H_{cycles}$ repetitions of the following:
+- $L_{cycles}$ of the prediction of $z_L$
+- 1 prediction of $z_H$
+
+This full cycle is repeated $N_{sup}$ times during training (and $N_{val}$ times during inference). Having two different values for training and inference gives flexibility on inference time and quality.
+
+A key bit of efficiency in HRM and TRM is that the first $H_{cycles}$ are performed with no gradient backprop. This reduces the training time considerably, while still leaving some room for the gradient
+to back-propagage through the entire network.
+
+This approach allows HRM/TRM to emulate deep networks with faster training time and less exposure to the classical pain point of deep learning (vanishing/exploding gradients, shattered gradients).
+
+With a typical hyper-parameter tuning ($H_{cycles}=3$, $L_{cycles}=6$, $num_{layers}=4$, $N_{sup}=16$), TRM emulates $16 * 4 * 6 * 3 = 1,152$ layers.
+
+During inference, $z_H$ is available throughout the cycles, which lets us "peak" into the thinking of TRM by decoding $z_H$ into an output. Watch TRM reason its way through a Sudoku Extreme below:
+
+![TRM thinking on Sudoku](/images/2026/intro-to-trm/sudoku_thinking_9_steps.gif)
+
+## Key bits for performance
+
+Several elements are key for TRM to work well. They are mentioned in the paper but may slip through the attention of some readers:
+- EMA (Exponential Moving Average) makes a massive difference in evaluation performance (double-digits difference in accuracy)
+- MLP may work significantly better than attention on some problems (e.g. Sudoku)
+- Lots of data augmentation are used on ARC-AGI and they bring a lot of value on most problems (not specific to TRM, but worth mentioning that TRM does not free us up from this!)
+
+## Implementation tricks
+
+The implementation of TRM can be a little puzzling to the newcomer. A few bits deserve some attention:
+
+- The high-level supervision loop appears as a `for...` loop in the pseudo-code of the paper but is not implemented this way in the code. Instead, a `step` counter is maintained during 
+training for each sample to keep track of the number of reasoning steps that this sample went through. The sample is removed from the batch when it has reached the maximum number of steps ($N_sup$) or
+if the halting criteria is met. A sample stays in the batch as long as none of the conditions is met. This approach is fairly unusual compared to classical training pipelines, where a sample
+stays in a batch for exactly one step within an epoch. Consequently, the number of epochs to train a TRM appears to be larger, because many more training steps are needed to fully process the dataset.
+
+- The latent vectors $z_H$ and $z_L$ are maintained in a `carry` structure. This structure is long-lived throughout training.
+
+- The puzzle embeddings can be large if the number of tasks is large, e.g. for ARC-AGI. An implementation trick based on sparse embeddings makes training efficient by only propagating the gradient
+through the right puzzle embeddings. See the `CastedSparseEmbedding` class and the corresponding `CastedSparseEmbeddingSignSGD_Distributed` optimizer. The model maintains two optimizers: one for the 
+reasoning module and one for the puzzle embeddings.
+
+## Parameter count: is it really just 7M parameters?
+
+TRM claims to be tiny, with just 7M parameters. The community is having intense debates about what counts as a parameter or not in TRM. Here is how the paper approaches it:
+
+- The latent vectors $z_H$ and $z_L$ are *not* part of the parameter count. There are typically tiny ($512$-dim each).
+- The puzzle embeddings are *not* part of the parameter count either, because they are task-specific. They are fairly big (typically $512 * 1M = 500M$ for ARC-AGI-2).
+- The reasoning module is part of the parameter count and typically in the 7M range.
+
+One could argue that the puzzle embeddings should be part of the parameter count. This would make TRM much less tiny than it claims to be. The counter-argument is that
+the puzzle embeddings are task-specific and can be thrown away after training. On a new unseen task, new puzzle embeddings must be learned,
+but the intuition is that this learning step is akin to TTT (Test-Time Training) and leverages the pretrained reasoning module.
+
+## Conclusion
+
+TRM is an interesting architecture. It is too early to say whether we're looking at a revolution, but its simplicity and the results on open-source benchmarks are attractive.
+
+If you'd like to play with TRM, we highly recommend <a href="https://github.com/olivkoch/nano-trm">nano-trm</a> which provides a clean implementation of TRM while reproducing the results
+of the paper.
+
