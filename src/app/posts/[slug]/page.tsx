@@ -35,10 +35,10 @@ const mdxComponents: MDXRemoteProps['components'] = {
     />
   ),
   ul: (props) => (
-    <ul className="list-disc list-inside mb-4 text-apple-gray-600 space-y-2" {...props} />
+    <ul className="list-disc list-outside ml-6 mb-4 text-apple-gray-600 space-y-2" {...props} />
   ),
   ol: (props) => (
-    <ol className="list-decimal list-inside mb-4 text-apple-gray-600 space-y-2" {...props} />
+    <ol className="list-decimal list-outside ml-6 mb-4 text-apple-gray-600 space-y-2" {...props} />
   ),
   li: (props) => (
     <li className="text-apple-gray-600" {...props} />
