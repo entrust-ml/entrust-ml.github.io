@@ -27,7 +27,7 @@ Document verification faces different challenges, with the key feature being the
 
 ![ID documents from various countries](/images/2024/serving-lora-models-at-scale/id_documents_collage.jpg)
 
-_ID documents from various countries._
+^: ID documents from various countries.
 
 
 
@@ -38,7 +38,7 @@ We can imagine several approaches to the problem.
 
 ![Template-based and VLM-based OCR](/images/2024/serving-lora-models-at-scale/template_ocr_and_vlm.jpg)
 
-_Template-based and using visual language models-based OCR_
+^: Template-based and using visual language models-based OCR
 
 Identity documents are very regular. Within a single document type, data fields will always be in the same position relative to the document. We can leverage this regularity and annotate the location of data fields with bounding boxes in a template and, after aligning the input image to the template, apply an OCR algorithm to that region. This method will work, but it will hit a performance ceiling when we realize that some document types are less regular than others: fields, particularly the address field, can span multiple lines and field alignment can be variable, both in the horizontal and vertical.
 
@@ -48,7 +48,7 @@ To achieve the human-level extraction accuracy we require from our product, we n
 
 ![Extraction architecture](/images/2024/serving-lora-models-at-scale/extraction_architecture.jpg)
 
-_Transformer-based end-to-end extraction architecture_
+^: Transformer-based end-to-end extraction architecture
 
 The model inputs are an image and a text prompt. The image is encoded by a vision transformer and the resulting embedding together with the prompt are fed into a decoder that produces the desired output.
 
@@ -65,7 +65,7 @@ So now we have a medium-size model, 250M parameters, 1GB when saved on disk and 
 
 ![Different document type grouping scenarios](/images/2024/serving-lora-models-at-scale/model_grouping_options.png)
 
-_Different options for grouping document types and models_
+^: Different options for grouping document types and models
 
 As we move along this spectrum from left to right, we buy flexibility by paying with additional complexity. The solution on the left is the simplest one: only one model needs to be trained, only one model needs to be deployed. But it is also the most rigid solution: to support an additional document type, the whole model needs to be retrained; a process that can take several days of training time.
 
@@ -80,7 +80,7 @@ Low-Rank Adaptation (LoRA) is a parameter-efficient fine-tuning method. The idea
 
 ![LoRA architecture |md](/images/2024/serving-lora-models-at-scale/lora.jpg)
 
-_Architecture of a LoRA layer_
+^: Architecture of a LoRA layer
 
 Let us consider an ordinary linear layer in the model,
 
@@ -99,7 +99,7 @@ $d=768$, so this results in 96- or 48-fold reduction in the number of trainable 
 
 ![Attention layer |md](/images/2024/serving-lora-models-at-scale/transformer_architecture.jpg)
 
-_Schema of the attention layer and the general transformer architecture_
+^: Schema of the attention layer and the general transformer architecture
 
 We apply this method to layers throughout the network. In a transformer architecture we can adapt the Q, K and V projection layers in each attention head, the linear layer merging attention heads together as well as the post-attention MLP layer. Going beyond transformers, with small modifications, LoRA can also be applied to convolutional layers.
 
@@ -144,7 +144,7 @@ $A$ and $B$ matrices, we can reduce the training time to values comparable to re
 
 ![VeRA and LoRA-XS](/images/2024/serving-lora-models-at-scale/vera_lora_xs.jpg)
 
-_VeRA and LoRA-XS_
+^: VeRA and LoRA-XS
 
 For example, VeRA, freezes the matrices
 $A$ and $B$

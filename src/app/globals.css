@@ -60,7 +60,7 @@ a:hover {
 .prose-apple {
   --tw-prose-body: #424245;
   --tw-prose-headings: #1d1d1f;
-  --tw-prose-links: #0066cc;
+  --tw-prose-links: #723988;
   --tw-prose-code: #723988; /* Brand purple for inline code */
   --tw-prose-pre-code: #e1e4e8; /* Light gray for block code fallback */
   --tw-prose-pre-bg: #0d1117;
@@ -68,7 +68,6 @@ a:hover {
 
 /* Code block styling */
 .prose-apple pre code {
-  color: #e1e4e8 !important; 
   background-color: transparent !important;
 }
 
@@ -105,9 +104,9 @@ a:hover {
 }
 
 /* Image captions - paragraphs containing only italic text */
-.prose p:has(> em:only-child) {
+/* .prose p:has(img) + p:has(> em:only-child) {
   @apply text-center text-apple-gray-500 text-sm mt-2;
-}
+} */
 
 /* Footnote styling */
 .footnotes {

@@ -8,10 +8,13 @@ import rehypeKatex from 'rehype-katex';
 import rehypePrettyCode from 'rehype-pretty-code';
 import { getPostBySlug, getAllPostSlugs } from '@/lib/posts';
 import Tag from '@/components/Tag';
+import { Children } from 'react';
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
+
+const CAPTION_MARKER = "^:";
 
 const mdxComponents: MDXRemoteProps['components'] = {
   h1: (props) => (
@@ -23,12 +26,35 @@ const mdxComponents: MDXRemoteProps['components'] = {
   h3: (props) => (
     <h3 className="text-xl font-semibold text-apple-gray-700 mb-3 mt-6 font-display" {...props} />
   ),
-  p: (props) => (
-    <p className="text-apple-gray-600 leading-relaxed mb-4" {...props} />
-  ),
+  p: ({ children, ...props }) => {
+    // Safely flatten content into an array so we can inspect the start
+    const content = Children.toArray(children);
+    const firstChild = content[0];
+
+    // Check if the paragraph starts with our text marker
+    if (typeof firstChild === 'string' && firstChild.startsWith(CAPTION_MARKER)) {
+      
+      // Clean up the marker from the text
+      const markerRegex = new RegExp(`^${CAPTION_MARKER.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*`);
+      content[0] = firstChild.replace(markerRegex, '');
+
+      return (
+        <p className="text-center text-apple-gray-500 text-sm mt-2" {...props}>
+          {content}
+        </p>
+      );
+    }
+
+    // Default formatting
+    return (
+      <p className="text-apple-gray-600 leading-relaxed mb-4" {...props}>
+        {children}
+      </p>
+    );
+  },
   a: (props) => (
     <a
-      className="text-blue-600 hover:underline"
+      className="text-entrust-purple hover:text-entrust-magenta transition-colors"
       target={props.href?.startsWith('http') ? '_blank' : undefined}
       rel={props.href?.startsWith('http') ? 'noopener noreferrer' : undefined}
       {...props}
