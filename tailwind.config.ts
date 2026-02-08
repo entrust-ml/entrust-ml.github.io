@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import typography from '@tailwindcss/typography';
 
 const config: Config = {
   content: [
@@ -55,6 +56,15 @@ const config: Config = {
           css: {
             maxWidth: 'none',
             color: '#1d1d1f',
+            pre: {
+              color: false,
+              backgroundColor: 'inherit',
+            },
+            code: {
+              color: 'inherit',
+              backgroundColor: 'inherit',
+              fontWeight: 'inherit',
+            },
             a: {
               color: '#0066cc',
               textDecoration: 'none',
@@ -73,7 +83,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [typography],
 };
 
 export default config;

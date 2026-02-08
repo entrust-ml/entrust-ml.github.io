@@ -61,15 +61,22 @@ a:hover {
   --tw-prose-body: #424245;
   --tw-prose-headings: #1d1d1f;
   --tw-prose-links: #0066cc;
-  --tw-prose-code: #1d1d1f;
-  --tw-prose-pre-bg: #1d1d1f;
+  --tw-prose-code: #723988; /* Brand purple for inline code */
+  --tw-prose-pre-code: #e1e4e8; /* Light gray for block code fallback */
+  --tw-prose-pre-bg: #0d1117;
 }
 
 /* Code block styling */
-pre code {
-  background: transparent !important;
-  padding: 0 !important;
+.prose-apple pre code {
+  color: #e1e4e8 !important; 
+  background-color: transparent !important;
 }
+
+/* 3. ALLOW syntax highlighting spans to keep their colors */
+/* This ensures tokens (blue/purple/green) stay colorful */
+/* .prose-apple pre code span {
+  color: inherit !important;
+} */
 
 /* Center images in blog posts */
 .prose img {
@@ -140,18 +147,7 @@ a[data-footnote-ref]:hover {
   text-decoration: underline !important;
 }
 
-/* Back reference arrow in footnotes */
-a[data-footnote-backref] {
-  @apply text-blue-600 ml-1;
-  text-decoration: none !important;
-}
-
-a[data-footnote-backref]:hover {
-  @apply text-blue-800;
-}
-
-/* Scroll offset for sticky header on anchor links */
-[id^="user-content-fn"],
-[id^="user-content-fnref"] {
-  scroll-margin-top: 5rem;
+.prose-apple pre code {
+  background-color: transparent !important;
+  font-size: inherit; /* Optional: ensures font size matches */
 }
