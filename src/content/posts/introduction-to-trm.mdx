@@ -53,7 +53,7 @@ The halting head is a binary classifier that decides whether the recursion loop 
 On this apect, TRM simplifies HRM significantly. While HRM relies on Q-learning, and therefore requires computing a future reward at the cost of additional inference, TRM
 uses PQN (the halting head is a simple linear classifier applied to $z_H$). This simplifies the halting mechanism significantly.
 
-In code, HRM stops like this:
+In code, HRM stops like this (notice the call to `inner()` which implies a full inference):
 
 ```python
 # 1. Run the model one more step into the future (lookahead)
@@ -63,7 +63,6 @@ next_q_halt, next_q_continue = self.inner(...)[-1]
 # value = max(future halt value, future continue Value)
 target_q_continue = torch.sigmoid(
     torch.where(is_last_step, next_q_halt, torch.maximum(next_q_halt, next_q_continue)))
-
 ```
 
 while TRM stops like this:
