@@ -69,7 +69,7 @@ while TRM stops like this:
 
 ```python
 q_logits = self.q_head(z_H[:, 0])
-halted = halted | (q_halt_logits > 0)
+halted = halted | (q_logits > 0)
 ```
 
 The architecture of the core reasoning module is the same for HRM and TRM, but here again, TRM simplifies things. Instead of relying on two networks (one for $z_H$ and one for $z_L$),
