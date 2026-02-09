@@ -43,7 +43,11 @@ export function getAllPosts(): PostMeta[] {
       } as PostMeta;
     });
 
-  return allPosts.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return allPosts.sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA; // Most recent first
+  });
 }
 
 export function getPostBySlug(slug: string): Post | null {
