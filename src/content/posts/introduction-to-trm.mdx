@@ -21,13 +21,13 @@ Meanwhile, Google's Gemini 3 models achieved outstanding performance in mathemat
 
 In short, every major AI lab released a reasoning ("thinking") variant of their model following DeepSeek R1.
 
-While all this was happening, a paralle revolution was happening for people with less means: the ARC-AGI challenge, which started several years ago, focuses on tasks that are relatively easy for humans yet hard or impossible for AI.
+While all this was happening, a parallel revolution was happening for people with less means: the ARC-AGI challenge, which started several years ago, focuses on tasks that are relatively easy for humans yet hard or impossible for AI.
 It took 4 years to go from 0% with GPT-3 in 2020 to 5% with GPT-4o in 2024 ARC Prize, then o3 jumped to 75.7%, but at a massive computation cost.  The price per task for o3's high efficiency mode was estimated at around &#0036;200, and the low efficiency mode at an eye-watering &#0036;3,400 per task. On ARC-AGI-1, o3 achieved 76% at &#0036;200/task in low-compute mode and 88% at &#0036;20,000/task in high-compute mode. The leaderboard is now organized as a 2×2 matrix with axes for cost-per-task and score. 
 The challenge is therefore designed to spur new research ideas. On ARC AGI 2, the 1st place solution (TRM) used a ~7M-parameter recursive model, the 2nd place (SOAR) used evolutionary program synthesis, and the 3rd (CompressARC) used MDL-based neural code golf with no pretraining.
 
 ## Hierarchical Reasoning Models
 
-TRM is an evolution of Hierarchical Recusive Models (<a href="https://arxiv.org/abs/2506.21734">HRM</a>), published by Sapient Intelligence (Singapore). HRM increases the efectiveness of depth with two couple recurring modules, each evolving at different frequency.
+TRM is an evolution of Hierarchical Recursive Models (<a href="https://arxiv.org/abs/2506.21734">HRM</a>), published by Sapient Intelligence (Singapore). HRM increases the effectiveness of depth with two coupled recurring modules, each evolving at different frequency.
 This design breaks the glass ceiling hit by Recurrent Transformers.
 
 ![HRM increases depth efficiency](/images/2026/intro-to-trm/hrm-breaking-depth-ceiling.png)
@@ -46,11 +46,11 @@ TRM builds upon HRM but strips off a lot of complexity. The high-level architect
 
 ![TRM architecture](/images/2026/intro-to-trm/trm-architecture.png)
 
-TRM is recursive because it recursively maintains a latent representation of the soluzion, $z_H$, and of the problem, $z_L$. These two vectors are continuously updated
+TRM is recursive because it recursively maintains a latent representation of the solution, $z_H$, and of the problem, $z_L$. These two vectors are continuously updated
 during training.
 
 The halting head is a binary classifier that decides whether the recursion loop should stop or not, i.e. whether the model should stop thinking for a given input.
-On this apect, TRM simplifies HRM significantly. While HRM relies on Q-learning, and therefore requires computing a future reward at the cost of additional inference, TRM
+On this aspect, TRM simplifies HRM significantly. While HRM relies on Q-learning, and therefore requires computing a future reward at the cost of additional inference, TRM
 uses PQN (the halting head is a simple linear classifier applied to $z_H$). This simplifies the halting mechanism significantly.
 
 In code, HRM stops like this (notice the call to `inner()` which implies a full inference):
@@ -73,7 +73,7 @@ halted = halted | (q_halt_logits > 0)
 ```
 
 The architecture of the core reasoning module is the same for HRM and TRM, but here again, TRM simplifies things. Instead of relying on two networks (one for $z_H$ and one for $z_L$),
-    it uses a single one. It isn't just the same architecture, it is the same network with the same *weights*. The trick is to used different inputs to specify the task:
+    it uses a single one. It isn't just the same architecture, it is the same network with the same *weights*. The trick is to use different inputs to specify the task:
     - To predict $z_L$ (the problem), we input $z_L$, $z_H$ and the input $x$
     - To predict $z_H$ (the solution), we only input $z_H$ and $z_L$
 
@@ -86,20 +86,20 @@ show that self-attention is better on ARC-AGI-2 and Maze-Hard but not on Sudoku.
 
 ![TRM reasoning module](/images/2026/intro-to-trm/trm-reasoning-module.png)
 
-Muck like in HRM, a full forward pass of the model involves $H_{cycles}$ repetitions of the following:
+Much like in HRM, a full forward pass of the model involves $H_{cycles}$ repetitions of the following:
 - $L_{cycles}$ of the prediction of $z_L$
 - 1 prediction of $z_H$
 
 This full cycle is repeated $N_{sup}$ times during training (and $N_{val}$ times during inference). Having two different values for training and inference gives flexibility on inference time and quality.
 
 A key bit of efficiency in HRM and TRM is that the first $H_{cycles}$ are performed with no gradient backprop. This reduces the training time considerably, while still leaving some room for the gradient
-to back-propagage through the entire network.
+to back-propagate through the entire network.
 
 This approach allows HRM/TRM to emulate deep networks with faster training time and less exposure to the classical pain point of deep learning (vanishing/exploding gradients, shattered gradients).
 
 With a typical hyper-parameter tuning ($H_{cycles}=3$, $L_{cycles}=6$, $num_{layers}=4$, $N_{sup}=16$), TRM emulates $16 * 4 * 6 * 3 = 1,152$ layers.
 
-During inference, $z_H$ is available throughout the cycles, which lets us "peak" into the thinking of TRM by decoding $z_H$ into an output. Watch TRM reason its way through a Sudoku Extreme below:
+During inference, $z_H$ is available throughout the cycles, which lets us "peek" into the thinking of TRM by decoding $z_H$ into an output. Watch TRM reason its way through a Sudoku Extreme below:
 
 ![TRM thinking on Sudoku](/images/2026/intro-to-trm/sudoku_thinking_9_steps.gif)
 
