@@ -71,7 +71,7 @@ As we move along this spectrum from left to right, we buy flexibility by paying 
 
 On the right we have the most flexible solution. Each model is responsible for an individual document type. If we want to support another document type, we simply train another model. And compared to the other end of the spectrum, this training will be fast, because we only need data from a single document type.
 
-The middle of the spectrum tries to compromise between the two extremes. By grouping document types and training Before embarking on the journey that prioritizes flexibility, we should always ask whether flexibility is worth the price. For us the answer was clear: It important, not only to be able to quickly add support for additional document types or additional fields to be extracted, but also to be able to do that safely without impacting performance on all already supported documents.
+The middle of the spectrum tries to compromise between the two extremes. Before embarking on the journey that prioritizes flexibility, we should always ask whether flexibility is worth the price. For us the answer was clear: it is important, not only to be able to quickly add support for additional document types or additional fields to be extracted, but also to be able to do that safely without impacting performance on all already supported documents.
 
 And now we arrive at the question that motivated the talk: How do we serve 1,000 medium-sized models in production? A single GPU node can fit up to four models. Which means we would need 250 GPU nodes, more if we want redundancy. This leads to two problems: First, GPUs cost money; provisioning 250 GPUs on AWS will cost >$100k/month. But even if we were willing to pay this money, we might not be able to get the GPUs. GPUs are scarce, even on AWS.
 
@@ -86,12 +86,12 @@ Let us consider an ordinary linear layer in the model,
 
 $$h=W x\,$$
 
-with $W$ in $\mathbb{R}^{d \times d}$ a weight matrix, and $x, h \in \mathbb{R}^d$
+with $W \in \mathbb{R}^{d \times d}$ a weight matrix, and $x, h \in \mathbb{R}^d$
  the layer inputs and outputs. LoRA modifies the layer to
 
 $$h=(W+A B) x,$$
 
-with $A \in \mathbb{R}^{r \times d}, B \in R^{d \times r}$ and $r \ll d$ a hyper-parameter. Then, as the rank of
+with $A \in \mathbb{R}^{r \times d}, B \in \mathbb{R}^{d \times r}$ and $r \ll d$ a hyper-parameter. Then, as the rank of
 $A B$ is at most $r$ , the matrix $A B$ is a low-rank update to $W$.
 During LoRA training we keep $W$ constant and only learn the matrices $A$ and $B$, thus reducing the number of trainable parameters from
 $d^2$ to $2rd$. A common choice for the rank is $r=4$ or $r=8$. In a ViT base model, we have
@@ -109,12 +109,12 @@ The collection of all low rank updates to a model is called an adapter and stori
 
 ## LoRA in practice
 
-The practical implementation of LoRA is made easy using the PeFT library, short for Parameter-efficient Fine-Tuning) together with the Transformers library. Adapting a model for LoRA training can be as simple as
+The practical implementation of LoRA is made easy using the PeFT library (short for Parameter-Efficient Fine-Tuning) together with the Transformers library. Adapting a model for LoRA training can be as simple as
 
 ```python
 import peft, timm
 
-model = timm.create_model("convnext_base", nu)
+model = timm.create_model("convnext_base")
 config = peft.LoraConfig(
     r=4,
     target_modules=r".*\.conv_dw|.*\.mlp\.fc\d",
@@ -136,7 +136,7 @@ After implementing LoRA training and training a first model, we may find that th
 - Two key factors that influence both accuracy and the size of the adapter are the rank $r$, and the choice of which layers to adapt. A good rule of thumb is to start by adapting all linear layers and then tune
 $r$ to get the desired accuracy/adapter size trade-off.
 - The original LoRA paper includes a scaling parameter alpha, which acts on the update matrices via
-$h=\left(W+\frac{\alpha}{r} A B\right) x$. Empirically, $ \alpha= 2r $, appears to be a good choice, but Sebastian Raschka has [found](https://magazine.sebastianraschka.com/p/practical-tips-for-finetuning-llms) that sometime tuning alpha can improve performance.
+$h=\left(W+\frac{\alpha}{r} A B\right) x$. Empirically, $ \alpha= 2r $, appears to be a good choice, but Sebastian Raschka has [found](https://magazine.sebastianraschka.com/p/practical-tips-for-finetuning-llms) that sometimes tuning alpha can improve performance.
 - We have observed that training a LoRA adapter requires about twice the number of epochs compared to regular fine-tuning to achieve the same accuracy. More recently, [Hayou et al.](https://arxiv.org/abs/2402.12354) have applied theoretical insights on large width networks to show that by using different learning rates for the
 $A$ and $B$ matrices, we can reduce the training time to values comparable to regular fine-tuning. If the need for even smaller adapters arises, then there are methods such as VeRA or LoRA-XS that reduce the trainable parameter count even further.
 
@@ -148,7 +148,7 @@ $A$ and $B$ matrices, we can reduce the training time to values comparable to re
 
 For example, VeRA, freezes the matrices
 $A$ and $B$
- after random initialization and shares them across layers. Instead, VeRA only trains diagonal scaling matrices $\Lambda_d$ and $\text { Lambda }_b$.
+ after random initialization and shares them across layers. Instead, VeRA only trains diagonal scaling matrices $\Lambda_d$ and $\Lambda_b$.
 
 LoRA-XS follows the same idea, but instead of initializing $A$ and $B$ randomly, it uses the singular value decomposition of the weight matrix
 $W$. The trainable parameters are contained in the
