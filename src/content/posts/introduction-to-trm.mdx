@@ -115,7 +115,7 @@ Several elements are key for TRM to work well. They are mentioned in the paper b
 The implementation of TRM can be a little puzzling to the newcomer. A few bits deserve some attention:
 
 - The high-level supervision loop appears as a `for...` loop in the pseudo-code of the paper but is not implemented this way in the code. Instead, a `step` counter is maintained during 
-training for each sample to keep track of the number of reasoning steps that this sample went through. The sample is removed from the batch when it has reached the maximum number of steps ($N_sup$) or
+training for each sample to keep track of the number of reasoning steps that this sample went through. The sample is removed from the batch when it has reached the maximum number of steps ($N_{sup}$) or
 if the halting criteria is met. A sample stays in the batch as long as none of the conditions is met. This approach is fairly unusual compared to classical training pipelines, where a sample
 stays in a batch for exactly one step within an epoch. Consequently, the number of epochs to train a TRM appears to be larger, because many more training steps are needed to fully process the dataset.
 
