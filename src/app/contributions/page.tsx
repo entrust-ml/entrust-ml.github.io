@@ -79,6 +79,11 @@ const openSourceProjects: OpenSourceProject[] = [
     description: 'TensorFlow port of PyTorch Image Models (timm) - image models with pretrained weights.',
     link: 'https://github.com/martinsbruveris/tensorflow-image-models',
   },
+  {
+    name: 'nano-TRM',
+    description: 'Tiny Recursive Models (TRM) implementation in pytorch designed for experimentation',
+    link: 'https://github.com/olivkoch/nano-trm',
+  },
 ];
 
 export default function ContributionsPage() {
